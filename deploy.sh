@@ -1,28 +1,16 @@
 #!/bin/bash
 
-EC2_USER=ec2-user
 EC2_IP=18.60.225.40
-KEY=mykey.pem
-
-echo "Creating key"
-
-echo "$PRIVATE_KEY" > $KEY
-chmod 400 $KEY
 
 echo "Copying backend files"
 
-scp -o StrictHostKeyChecking=no -i $KEY -r backend/* $EC2_USER@$EC2_IP:/home/ec2-user/app/
+scp -i backend.pem -o StrictHostKeyChecking=no -r backend ec2-user@$EC2_IP:/home/ec2-user/
 
 echo "Running backend"
 
-ssh -o StrictHostKeyChecking=no -i $KEY $EC2_USER@$EC2_IP << EOF
-
-pkill gunicorn
-
-cd app
-
+ssh -i backend.pem -o StrictHostKeyChecking=no ec2-user@$EC2_IP << 'EOF'
+cd backend
 pip3 install -r requirements.txt
-
-nohup gunicorn -b 0.0.0.0:5000 app:app &
-
+pkill -f app.py || true
+nohup python3 app.py > output.log 2>&1 &
 EOF
