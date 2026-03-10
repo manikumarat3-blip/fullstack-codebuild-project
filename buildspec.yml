@@ -12,6 +12,7 @@ phases:
       - echo "Installing React dependencies"
       - cd frontend
       - npm install
+
       - echo "Building React App"
       - npm run build
       - cd ..
@@ -20,6 +21,15 @@ phases:
     commands:
       - echo "Uploading frontend to S3"
       - aws s3 sync frontend/build s3://fullstack-react-frontend1
+
+      - echo "Fetching EC2 private key from Parameter Store"
+      - aws ssm get-parameter --name "/ec2/keypair" --with-decryption --query Parameter.Value --output text > mykey.pem
+      - chmod 400 mykey.pem
+
       - echo "Deploying backend to EC2"
       - chmod +x deploy.sh
       - ./deploy.sh
+
+artifacts:
+  files:
+    - '**/*'
