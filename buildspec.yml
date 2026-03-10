@@ -1,7 +1,6 @@
 version: 0.2
 
 phases:
-
   install:
     runtime-versions:
       nodejs: 18
@@ -23,14 +22,13 @@ phases:
       - aws s3 sync frontend/build s3://fullstack-react-frontend1
 
       - echo "Fetching EC2 private key from Parameter Store"
-      - aws ssm get-parameter --name "/ec2/keypair" --with-decryption --query Parameter.Value --output text > mykey.pem
-      - sed -i 's/\\n/\n/g' mykey.pem
-      - chmod 400 mykey.pem
+      - aws ssm get-parameter --name "/ec2/keypair" --with-decryption --query Parameter.Value --output text > backend.pem
+
+      - echo "Fixing key format"
+      - echo -e "$(cat backend.pem)" > backend.pem
+
+      - chmod 400 backend.pem
 
       - echo "Deploying backend to EC2"
       - chmod +x deploy.sh
       - ./deploy.sh
-
-artifacts:
-  files:
-    - '**/*'
