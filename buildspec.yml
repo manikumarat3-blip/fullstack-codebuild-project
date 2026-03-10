@@ -1,0 +1,33 @@
+version: 0.2
+
+phases:
+
+  install:
+    runtime-versions:
+      nodejs: 18
+      python: 3.10
+
+  build:
+    commands:
+
+      echo "Installing React dependencies"
+      cd frontend
+      npm install
+
+      echo "Building React App"
+      npm run build
+      cd ..
+
+  post_build:
+    commands:
+
+      echo "Uploading frontend to S3"
+      aws s3 sync frontend/build s3://fullstack-react-frontend
+
+      echo "Deploying backend to EC2"
+      chmod +x deploy.sh
+      ./deploy.sh
+
+artifacts:
+  files:
+    - '**/*'
