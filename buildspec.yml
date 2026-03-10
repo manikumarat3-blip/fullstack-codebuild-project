@@ -9,25 +9,17 @@ phases:
 
   build:
     commands:
-
-      echo "Installing React dependencies"
-      cd frontend
-      npm install
-
-      echo "Building React App"
-      npm run build
-      cd ..
+      - echo "Installing React dependencies"
+      - cd frontend
+      - npm install
+      - echo "Building React App"
+      - npm run build
+      - cd ..
 
   post_build:
     commands:
-
-      echo "Uploading frontend to S3"
-      aws s3 sync frontend/build s3://fullstack-react-frontend1
-
-      echo "Deploying backend to EC2"
-      chmod +x deploy.sh
-      ./deploy.sh
-
-artifacts:
-  files:
-    - '**/*'
+      - echo "Uploading frontend to S3"
+      - aws s3 sync frontend/build s3://fullstack-react-frontend1
+      - echo "Deploying backend to EC2"
+      - chmod +x deploy.sh
+      - ./deploy.sh
