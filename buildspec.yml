@@ -24,6 +24,7 @@ phases:
 
       - echo "Fetching EC2 private key from Parameter Store"
       - aws ssm get-parameter --name "/ec2/keypair" --with-decryption --query Parameter.Value --output text > mykey.pem
+      - sed -i 's/\\n/\n/g' mykey.pem
       - chmod 400 mykey.pem
 
       - echo "Deploying backend to EC2"
