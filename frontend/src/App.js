@@ -5,7 +5,7 @@ function App() {
   const [products,setProducts] = useState([]);
 
   useEffect(()=>{
-    fetch("http://EC2_PUBLIC_IP:5000/products")
+    fetch("http://18.60.225.40:5000/products")
       .then(res=>res.json())
       .then(data=>setProducts(data));
   },[]);
