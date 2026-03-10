@@ -1,34 +1,38 @@
 version: 0.2
 
+env:
+  variables:
+    AWS_DEFAULT_REGION: ap-south-2
+    IMAGE_REPO_NAME: backend-repo
+    IMAGE_TAG: latest
+
 phases:
   install:
     runtime-versions:
       nodejs: 18
       python: 3.10
 
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin 672897707467.dkr.ecr.ap-south-2.amazonaws.com
+
   build:
     commands:
-      - echo "Installing React dependencies"
+      - echo Build React frontend
       - cd frontend
       - npm install
-
-      - echo "Building React App"
       - npm run build
       - cd ..
 
-  post_build:
-    commands:
-      - echo "Uploading frontend to S3"
+      - echo Upload frontend to S3
       - aws s3 sync frontend/build s3://fullstack-react-frontend1
 
-      - echo "Fetching EC2 private key from Parameter Store"
-      - aws ssm get-parameter --name "/ec2/keypair" --with-decryption --query Parameter.Value --output text > backend.pem
+      - echo Build backend Docker image
+      - docker build -t $IMAGE_REPO_NAME ./backend
+      - docker tag $IMAGE_REPO_NAME:latest 672897707467.dkr.ecr.ap-south-2.amazonaws.com/$IMAGE_REPO_NAME:latest
 
-      - echo "Fixing key format"
-      - echo -e "$(cat backend.pem)" > backend.pem
-
-      - chmod 400 backend.pem
-
-      - echo "Deploying backend to EC2"
-      - chmod +x deploy.sh
-      - ./deploy.sh
+  post_build:
+    commands:
+      - echo Push Docker image
+      - docker push 672897707467.dkr.ecr.ap-south-2.amazonaws.com/$IMAGE_REPO_NAME:latest
